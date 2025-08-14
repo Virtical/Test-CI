@@ -1,0 +1,38 @@
+name: Tests
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Check branch is up to date
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin master
+          if [ "$(git merge-base HEAD origin/master)" != "$(git rev-parse origin/master)" ]; then
+            echo "❌ Branch is not up to date with master."
+            exit 1
+          fi
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Run Unit Tests
+        run: dotnet test --no-build --verbosity normal
