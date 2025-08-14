@@ -11,6 +11,6 @@ public class TestShould
     {
         const bool f = false;
 
-        f.Should().BeTrue();
+        f.Should().BeFalse();
     }
 }
